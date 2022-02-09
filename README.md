@@ -8,7 +8,7 @@ Esplora la dinamica della copertura vegetale nel vicentino usando la nostra web 
 
 [<p align="center"><img src="img/webapp-button-blue.png" alt="open web app button" width="200"></p>](https://vicenzainnovationlab.users.earthengine.app/view/verde-nel-vicentino)
 
-<p align="center"><img  src="img/app-cover-full-ndvi.png" alt="app screenshot" width="600"></p>
+<p align="center"><img  src="img/app-cover-full-ndvi.png" alt="app screenshot" width="800"></p>
 
 <p align="justify"><i>Il progetto è parte del Programma Operativo Regionale del Fondo Europeo di Sviluppo Regionale (POR FESR 2014 - 2020) del Veneto, nell'ambito del bando dell'azione 231 volto alla "costituzione di Innovation Lab diretti al consolidamento/sviluppo del network Centri P3@-Palestre Digitali e alla diffusione della cultura degli Open Data."</i></p>
 <p align="center"><img src="img/logo-partecipanti.png" alt="logo of participants" width="700"></p>
@@ -35,23 +35,23 @@ Questo repository contiene il codice JavaScript che abbiamo utilizzato per l'ela
 
 ### Come usare la web app
 
-1. Quando la [web app](https://vicenzainnovationlab.users.earthengine.app/view/verde-nel-vicentino) è aperta (potrebbero volerci alcuni secondi per caricarla), si apre una mappa della provincia di Vicenza, dove la diversa intensità del colore verde mostra la distribuzione del NDVI di un determinato territorio. I valori sono *mediani* (non *medi*) per il periodo prescelto - vedi sotto.
+1. Quando la [web app](https://vicenzainnovationlab.users.earthengine.app/view/verde-nel-vicentino) è aperta (potrebbero volerci alcuni secondi per caricarla), si apre una mappa del comune di Vicenza. Diversi colori mostrano una tendenza all'aumento o al decremento della vegetazione in un determinato territorio. Questa tendenza viene calcolata per il periodo dall'aprile 2017 fino ad oggi. L'app è sempre aggiornata perché nuove immagini dai satelliti Sentinel-2 arrivano settimanalmente.
 
-2. Dall'elenco a tendina è possibile selezionare un'altra provincia del Veneto.
+2. Dall'elenco a tendina è possibile selezionare un'altro comune vicentino.
 
-3. Per impostazione predefinita, l'intervallo di date è impostato per gli ultimi 30 giorni. Puoi cambiarlo. Tuttavia, la data di inizio non può essere precedente al 28/03/2017 a causa della mancanza di dati.
+3. Ora la cosa più interessante: ingrandisci la mappa nell'area di tuo interesse e fai un clic. Nel pannello a destra, apparirà un grafico con diverse linee spezzate, che, a questo punto, mostrano la dinamica dell'indice NDVI sovrapponendo tutti gli anni precendenti, giorno per giorno.
 
-4. Ora la cosa più interessante: ingrandisci la mappa nell'area di tuo interesse e fai un clic. Nel pannello a destra, apparirà un grafico con una curva verde, che, a questo punto, mostra la dinamica dell'indice NDVI per il periodo selezionato. Il grafico mostra anche una trend line rossa (o meglio, una curva di tendenza polinomiale).
+4. In alto a destra del grafico c'è un pulsante che consente di espanderlo in una finestra separata. In quella nuova finestra sarà possibile scaricare i dati iniziali del grafico nel formato CSV.
 
-5. In alto a destra del grafico c'è un pulsante che consente di espanderlo in una finestra separata. In quella nuova finestra sarà possibile scaricare i dati iniziali del grafico nel formato CSV.
+<p align="center"><img  src="img/chart.png" alt="app screenshot con il grafico" width="600"></p>
 
 ### Come interpretare la mappa e il grafico?
 
 Ecco un riferimento:
-- Valori negativi di NDVI (valori prossimi a -1) corrispondono all'acqua.
-- Valori prossimi allo zero (da -0,1 a 0,1) corrispondono generalmente ad aree aride di roccia, sabbia o neve.
-- Valori bassi e positivi rappresentano arbusti e prati (da 0,2 a 0,4 circa).
-- Valori alti indicano foreste pluviali temperate e tropicali (valori prossimi a 1).
+- Valori negativi di NDVI (valori prossimi a `−1`) corrispondono all'acqua.
+- Valori prossimi allo zero (da `−0,1` a `0,1`) corrispondono generalmente ad aree aride di roccia, sabbia o neve.
+- Valori bassi e positivi rappresentano arbusti e prati (da `0,2` a `0,4` circa).
+- Valori alti indicano foreste pluviali temperate e tropicali (valori prossimi a `1`).
 
 Attenzione: la curva NDVI potrebbe interrompersi in assenza di dati Sentinel-2 (ad esempio, a causa dell'elevata nuvolosità).
 
