@@ -1,19 +1,21 @@
 /*******************************************************************************
- * Code style *
+ * Developed by Yaroslav Vasyunin <https://github.com/y-vasyunin>
+ * for the InnovationLab Vicenza project, February 2022
+ * <https://www.comune.vicenza.it/uffici/cms/innovationlabvicenza.php>
  * 
- *  - use camelCase for function and variable names
- *  - use double quotes by default
- *  - use double space after your code and before // in inline comments
+ * Description: <https://github.com/VicenzaInnovationLab/ee-verde-nel-vicentino>
  ******************************************************************************/
 
 /*******************************************************************************
- * Model *
+ * MODEL *
  ******************************************************************************/
 
 // Define a JSON object for storing the data model
+
 var m = {};
 
-/* Night-time Imagery *********************************************************/
+/* Multispectral Imagery ******************************************************/
+
 m.s2 = {};
 m.s2 = {
   name: "Sentinel 2",
@@ -25,72 +27,74 @@ m.s2 = {
   scale: 10,
   url: "https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR",
   vis: {
-    min: 0,
-    max: 1,
-    opacity: 0.6,
+    min: -5,
+    max: 5,
+    opacity: 0.8,
+    bands: ["scale"],  // 'scale'refers to the 'slope' of the line (k parameter)
     palette: [
-      "#ED0103", "#FF9700", "#FFE500",
-      "#79CC01",
-      "#189002", "#007800", "004400"
+      "a50000", "#ff8c8c",  // red
+      "#FFFFFF", "#FFFFFF", // white
+      "9AD0EC", "09009B" // blue
     ],
   },
 };
 
 /* Territory of Interest ******************************************************/
-m.provinces = {};
-m.provinces.source = ee.FeatureCollection(
-  "users/VicenzaInnovationLab/istat21-province-g")
-  .filter(ee.Filter.eq("COD_REG", 5));  // Veneto Region provinces
-m.provinces.filtFieldName = "DEN_UTS";
-m.provinces.filtFieldVal = "Vicenza";
-m.provinces.list = m.provinces.source.aggregate_array(m.provinces.filtFieldName)
-                   .sort().getInfo();
-m.provinces.vis = {color: "#000000", width: 2, fillColor: "ff000000"};
-m.provinces.zoom = 10;
+
+m.areas = {};
+m.areas.source = ee.FeatureCollection(
+  "users/VicenzaInnovationLab/istat21-comuni-g")
+  .filter(ee.Filter.eq("COD_PROV", 24));  // only Vicenza Province 
+m.areas.filtFieldName = "COMUNE";
+m.areas.filtFieldVal = "Vicenza";
+m.areas.list = m.areas.source.aggregate_array(m.areas.filtFieldName)
+                             .sort().getInfo();
+m.areas.vis = {color: "#000000", width: 2, fillColor: "ff000000"};
 
 /* Time Interval **************************************************************/
+
 m.timeline = {};
 m.timeline.format = "YYYY-MM-dd";
-m.timeline.deltaDays = -30;
+m.timeline.delta = -3;
+m.timeline.start = m.s2.dateStart;
 m.timeline.today = ee.Date(Date.now()).format(m.timeline.format);
-m.timeline.start = ee.Date(Date.now()).advance(m.timeline.deltaDays, "day")
-                   .format(m.timeline.format).getInfo();  // will be reset in the code
+/* use this code if you want to set the Start date dynamically
+m.timeline.start = ee.Date(Date.now()).advance(m.timeline.delta, "year")
+          .format(m.timeline.format).getInfo(); */
 m.timeline.end = m.timeline.today.getInfo();  // will be reset in the code
-m.timeline.dateInfo = {
-  start: {selected: ""},
-  end: {selected: ""}
-};
 
 /* Other **********************************************************************/
-m.bufRadius = 20;  // in a clicked point, in meters
+
+m.bufRadius = 10;  // in a clicked point, in meters
 
 /*******************************************************************************
- * Translation *
+ * TRANSLATION *
  ******************************************************************************/
 
 // Choose app language: "it", "en" or "ru"
 var ln = "it";  
 
-// Define a JSON object for storing translated text
+// Define a JSON object for storing multilingual strings
 var t = {};
 
 t.title = {
   it: "Cambiamenti del verde nel vicentino",
   en: "Green Space and its Changes in the Vicenza Province",
-  en: "Изменения в растительном покрове в провинции Виченцы",
+  ru: "Изменения в растительном покрове в провинции Виченцы",
 };
 
 t.intro = {
-  it: "Seleziona una provincia e un periodo per osservare i cambiamenti della \
-  vegetazione. Per vedere una dinamica in un punto specifico clicca sulla \
-  mappa e aspetta un po' - i calcoli che creano il grafico vengono eseguiti \
-  nel tempo reale.",
-  en: "Select the province and time period to observe the changes of the \
-  vegetation cover. Click on the map to see a dynamic at a specific point and \
-  wait a while - the calculations that create the chart are done in real time.",
-  ru: "Выберите провинцию и период времени, чтобы увидеть изменения в \
-  растительном покрове. Для изучения динамики в определенной точке надо \
-  кликнуть на карту и немного подождать - вычисления, которые создают график, \
+  it: "Seleziona un comune per osservare i cambiamenti della \
+  vegetazione dall'aprile 2017 fino ad oggi. Per vedere una dinamica \
+  dettagliata in un punto specifico clicca sulla mappa e aspetta un po' - i \
+  calcoli che creano il grafico vengono eseguiti nel tempo reale.",
+  en: "Select a municipality to observe the changes of the vegetation cover \
+  since April 2017. Click on the map to see a detailed dynamic at a specific \
+  point and wait a while — the calculations that create the chart are done \
+  in real time.",
+  ru: "Выберите муниципалитет, чтобы увидеть изменения в растительном \
+  покрове с апреля 2017 г. Для изучения динамики в определенной точке надо \
+  кликнуть на карту и немного подождать — вычисления, которые создают график, \
   выполняются в режиме реального времени.",
 };
 
@@ -108,13 +112,14 @@ t.chart.title = {
   ru: "Динамика в выбранной точке",
 };
 t.chart.vAxis = {
-  it: "NDVI",
+  it: "Indice NDVI",
   en: "NDVI",
   ru: "Индекс NDVI",
 };
-t.chart.hAxis = {it: "Data", en: "Date", ru: "Дата"};
-t.chart.trend = {it: "Trend", en: "Trend", ru: "Тренд"},
-t.chart.series = {it: "NDVI", en: "NDVI", ru: "NDVI"};
+t.chart.hAxis = {
+  it: "Numeri di giorni in un anno (1-365)",
+  en: "Day-of-Year Numbers (1–365)",
+  ru: "Порядковый номер дня в году (1–365)"};
 
 /* Chart Notes ****************************************************************/
 
@@ -126,12 +131,21 @@ t.chartNote.title = {
 };
 t.chartNote.section = {};
 t.chartNote.section[1] = {
-  it: "Attenzione: la curva NDVI potrebbe interrompersi in assenza di dati \
-  Sentinel-2 (ad esempio, a causa dell'elevata nuvolosità).",
-  en: "Attention: the NDVI curve may be interrupted in case of the lack of \
-  Sentinel-2 data (e.g. due to high cloudiness).",
-  ru: "Внимание: кривая изменения индекса NDVI может прерываться в случае \
-  отсутствия данных Sentinel-2 (например, из-за высокой облачности."
+  it: "L'asse Y mostra i valori dell'indice NDVI, da -1 a 1. Sull'asse X ci \
+  sono i numeri del giorno, da 1 a 365. Ogni anno è rappresentato da una \
+  curva singola. Pertanto, è possibile confrontare come cambia l'NDVI negli \
+  stessi giorni in anni diversi. Per aprire un grafico in una finestra \
+  separata o scaricare dati, fai clic sul pulsante in alto a destra dal grafico.",
+  en: "The Y-axis shows the values of the NDVI index, from -1 to 1. On the \
+  X-axis, there are the day numbers, from 1 to 365. Each year is represented \
+  by a separate curve. Thus, it is possible to compare how the NDVI changes \
+  on the same days in different years. To open a chart in a separate window \
+  or download data, click the button at the top right of it.",
+  ru: "На оси Y показаны значения индекса NDVI, от -1 до 1. На оси X \
+  расположены номера дней, от 1 до 365. Каждый год представлен отдельной \
+  кривой. Таким образом, можно сравнить, как меняется NDVI в одни и те же дни \
+  в разные годы. Чтобы открыть график в отдельном окне или скачать данные, \
+  нажми на кнопку вверху справа от него."
 };
 t.chartNote.section[2] = {
   it: "",
@@ -145,18 +159,18 @@ t.chartNote.section[3] = {
 };
 t.chartNote.body = {};
 t.chartNote.body[1] = {
-  it: "Valori negativi di NDVI (valori prossimi a -1) corrispondono all'acqua.",
-  en: "Negative NDVI values ​​(​​close to -1) correspond to water.",
-  ru: "Отрицательные значения NDVI, близкие к -1, соответствуют воде."
+  it: "Valori negativi di NDVI (valori prossimi a −1) corrispondono all'acqua.",
+  en: "Negative NDVI values ​(​close to −1) correspond to water.",
+  ru: "Отрицательные значения NDVI, близкие к −1, соответствуют воде."
 };
 t.chartNote.body[2] = {
-  it: "Valori prossimi allo zero (da -0,1 a 0,1) corrispondono generalmente ad aree aride di roccia, sabbia o neve.",
-  en: "Values ​​close to zero (from -0.1 to 0.1) generally correspond to arid rocky areas, sand or snow.",
-  ru: "Значения, близкие к нулю (от -0,1 до 0,1), обычно соответствуют засушливым каменистым участкам, песку или снегу."
+  it: "Valori prossimi allo zero (da −0,1 a 0,1) corrispondono generalmente ad aree aride di roccia, sabbia o neve.",
+  en: "Values ​​close to zero (from −0.1 to 0.1) generally correspond to arid rocky areas, sand or snow.",
+  ru: "Значения, близкие к нулю (от −0,1 до 0,1), обычно соответствуют засушливым каменистым участкам, песку или снегу."
 };
 t.chartNote.body[3] = {
   it: "Valori bassi e positivi rappresentano arbusti e prati (da 0,2 a 0,4 circa), mentre valori alti indicano foreste pluviali temperate e tropicali (valori prossimi a 1).",
-  en: "Low and positive values ​​represent shrubs and meadows (from 0.2 to 0.4 approx.), while high values ​​indicate temperate and tropical rainforests (values ​​close to 1)",
+  en: "Low and positive values ​represent shrubs and meadows (from 0.2 to 0.4 approx.), while high values ​indicate temperate and tropical rainforests (values ​close to 1)",
   ru: "Низкие и положительные значения соответствуют кустарниковой и луговой растительности (примерно от 0,2 до 0,4), а высокие значения указывают на влажные леса умеренного и тропического пояса (значения, близкие к 1)."
 };
 
@@ -174,18 +188,26 @@ t.layers.vector = {
   ru: "Административные границы",
 };
 t.layers.raster = {
-  it: "Mappa NDVI (mediana)",
-  en: "Median NDVI map",
-  ru: "Карта распределения NDVI (медиана)",
+  it: "Mappa di cambiamenti",
+  en: "Difference map",
+  ru: "Карта изменений",
 };
-t.layers.basemap = {it: "Mappa chiara", en: "Silver map", ru: "Светлая карта"};
+
+t.legend = {};
+t.legend.title = {
+  it: "Cambiamenti del verde",
+  en: "Green Cover Trends",
+  ru: "Тренды растительного покрова"};
+t.legend.min = {it: "decremento", en: "decrease", ru: "понижение"};
+t.legend.mid = {it: "assenza", en: "absence", ru: "отсутствие"};
+t.legend.max = {it: "aumento", en: "increase", ru: "увеличение"};
 
 /* Interface Elements *********************************************************/
 
-t.provinceSelectorLabel = {
-  it: "Scegli una provincia",
-  en: "Select a province",
-  ru: "Выберите провинцию",
+t.areaSelectorLabel = {
+  it: "Scegli un comune",
+  en: "Select a municipality",
+  ru: "Выберите муниципалитет",
 };
 
 t.timeline = {};
@@ -246,7 +268,7 @@ t.console.totalImages = {
 };
 
 /*******************************************************************************
- * Components *
+ * COMPONENTS *
  ******************************************************************************/
 
 // Define a JSON object for storing UI components
@@ -255,54 +277,19 @@ var c = {};
 c.title = ui.Label(t.title[ln]);
 c.intro = ui.Label(t.intro[ln]);
 
-/* Province Selector **********************************************************/
+/* Area Selector **********************************************************/
 
-c.selectProvince = {};
-c.selectProvince.label = ui.Label(t.provinceSelectorLabel[ln]);
-c.selectProvince.selector = ui.Select({
-  items:  m.provinces.list,
+c.selectArea = {};
+c.selectArea.label = ui.Label(t.areaSelectorLabel[ln]);
+c.selectArea.selector = ui.Select({
+  items:  m.areas.list,
   placeholder: t.chart.placeholder[ln],
   onChange: aoiNameHandler
 });
 
-c.selectProvince.panel = ui.Panel({
-  widgets: [c.selectProvince.label, c.selectProvince.selector],
+c.selectArea.panel = ui.Panel({
+  widgets: [c.selectArea.label, c.selectArea.selector],
   layout: ui.Panel.Layout.flow("horizontal")
-});
-
-/* Timeline *******************************************************************/
-
-c.timeline = {};
-
-// Start
-c.timeline.start = {};
-c.timeline.start.label = ui.Label(t.timeline.start[ln]);
-
-c.timeline.start.selector = ui.DateSlider({
-  start: m.s2.dateStart,
-  period: 1,
-  onChange: startDateHandler
-});
-c.timeline.start.panel = ui.Panel({
-  widgets: [c.timeline.start.label, c.timeline.start.selector],
-  layout: ui.Panel.Layout.flow("horizontal")
-});
-
-// End
-c.timeline.end = {};
-c.timeline.end.label = ui.Label(t.timeline.end[ln]);
-c.timeline.end.selector = ui.DateSlider({
-  start: m.s2.dateStart,
-  period: 1,
-  onChange: endDateHandler
-});
-c.timeline.end.panel = ui.Panel({
-  widgets: [c.timeline.end.label, c.timeline.end.selector],
-  layout: ui.Panel.Layout.flow("horizontal")
-});
-
-c.timeline.panel = ui.Panel({
-  widgets: [c.timeline.start.panel, c.timeline.end.panel],
 });
 
 /* Chart **********************************************************************/
@@ -329,7 +316,7 @@ c.chartNote.body[3] = ui.Label(t.chartNote.body[3][ln]);
 /* Legend *********************************************************************/
 
 c.legend = {};
-c.legend.title = ui.Label(t.chart.vAxis[ln]);
+c.legend.title = ui.Label(t.legend.title[ln]);
 c.legend.bar = {};
 c.legend.bar.colors = ui.Thumbnail({
   image: ee.Image.pixelLonLat().select(0),
@@ -343,9 +330,9 @@ c.legend.bar.colors = ui.Thumbnail({
   }
 });
 
-c.legend.bar.min = ui.Label(m.s2.vis.min);
-c.legend.bar.mid = ui.Label(m.s2.vis.max / 2),
-c.legend.bar.max = ui.Label(m.s2.vis.max);
+c.legend.bar.min = ui.Label(t.legend.min[ln]);
+c.legend.bar.mid = ui.Label(t.legend.mid[ln]),
+c.legend.bar.max = ui.Label(t.legend.max[ln]);
 
 c.legend.bar.labels = ui.Panel({
   widgets: [c.legend.bar.min, c.legend.bar.mid, c.legend.bar.max],
@@ -406,8 +393,7 @@ c.controlPanel = ui.Panel([
   c.title,
   c.intro,
   makePanelBreak(),
-  c.selectProvince.panel,
-  c.timeline.panel,
+  c.selectArea.panel,
   makePanelBreak(),
   c.chart.panel,
   makePanelBreak(),
@@ -417,13 +403,6 @@ c.controlPanel = ui.Panel([
   c.chartNote.body[2],
   c.chartNote.body[3],
 ]);
-
-/* Custom Base Map ************************************************************/
-c.basemap = {
-  mapTypeId: t.layers.basemap[ln],
-  styles: {},
-  types: [t.layers.basemap[ln]]
-};
 
 /*******************************************************************************
  * Composition *
@@ -438,7 +417,7 @@ Map.add(c.legend.panel);
 Map.onClick(mapClickHandler);
 
 /*******************************************************************************
- * Styling *
+ * STYLING *
  ******************************************************************************/
 
 // Define a JSON object for defining CSS-like class style properties
@@ -447,6 +426,7 @@ var s = {};
 /* Style Definitions **********************************************************/
 
 // Color palettes
+
 s.colors = {};
 s.colors.brand = {
   grigio0: "#e4e4e4",  // backgrounds
@@ -465,6 +445,7 @@ s.colors.chart = {
 };
 
 // Main text styles
+
 s.text = {};
 s.text.title = {
   fontSize: "26px",
@@ -478,13 +459,15 @@ s.text.chartNote.title = {fontWeight: "bold", fontSize: "16px"};
 s.text.chartNote.section = {fontWeight: "bold"};
 
 // Timeline
+
 s.timeline = {};
 s.timeline.selector = {width: "72%"};
 s.timeline.label = {stretch: "both"};
 
 // Chart
+
 s.chart = {};
-s.chart.placeholder = {color: s.colors.brand.blu, fontSize: 14};
+s.chart.placeholder = {color: s.colors.brand.rosso1, fontSize: 14};
 s.chart.title = {
   color: s.colors.brand.blu,
   fontSize: 16,
@@ -507,6 +490,11 @@ s.chart.default = {
 s.chart.options = {};
 s.chart.options.title = t.chart.title[ln];
 s.chart.options.titleTextStyle = s.chart.title;
+
+s.chart.options.pointSize = 3;
+s.chart.options.lineWidth = 2;
+s.chart.options.interpolateNulls = true;
+
 s.chart.options.vAxis = {
   title: t.chart.vAxis[ln],
   textStyle: s.chart.default,
@@ -519,21 +507,13 @@ s.chart.options.hAxis = {
   titleTextStyle: s.chart.axis,
   gridlines: { color: s.colors.chart.gridline },
 };
-s.chart.options.curveType = "function";
-s.chart.options.colors = [s.colors.chart.mainCurve];
-s.chart.options.legend = {textStyle: s.chart.axis};
+//s.chart.options.curveType = "function";
+//s.chart.options.colors = [s.colors.chart.mainCurve];
+//s.chart.options.legend = {textStyle: s.chart.axis};
 s.chart.options.chartArea = {backgroundColor: s.colors.chart.areaBackground};
-s.chart.options.trendlines = {};
-s.chart.options.trendlines[0] = {
-  title: t.chart.trend[ln],
-  type: "polynomial",
-  color: s.colors.chart.trend,
-  lineWidth: 2,
-  opacity: 0.9,
-  visibleInLegend: true
-};
 
 // Legend panel
+
 s.legend = {};
 s.legend.title = {fontWeight: "bold", fontSize: "12px"};
 s.legend.minMax = {margin: "4px 8px", fontSize: "12px"};
@@ -545,221 +525,10 @@ s.legend.mid = {
 };
 
 // About panel
-s.aboutButton = {position: "bottom-left", "shown": true};
 
-// Base map
-s.silverBasemap = [
-  {
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#f5f5f5"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#f5f5f5"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.land_parcel",
-    "elementType": "labels",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.land_parcel",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#bdbdbd"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#eeeeee"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#e5e5e5"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#ffffff"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "road.arterial",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#dadada"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "featureType": "road.local",
-    "elementType": "labels",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "road.local",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.line",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#e5e5e5"
-      }
-    ]
-  },
-  {
-    "featureType": "transit.station",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#eeeeee"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#c9c9c9"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  }
-];
+s.about = {};
+s.about.button = {position: "bottom-left", "shown": true};
+s.about.link = {color: s.colors.brand.blu};
 
 /* Style Settings *************************************************************/
 
@@ -771,41 +540,37 @@ c.controlPanel.style().set({
 c.title.style().set(s.text.title);
 c.intro.style().set(s.text.justified);
 
-// Province selector
-c.selectProvince.label.style().set({stretch: "vertical"});
-c.selectProvince.selector.style().set({stretch: "horizontal"});
+// Area selector
 
-// Timeline
-c.timeline.start.label.style().set(s.timeline.label);
-c.timeline.end.label.style().set(s.timeline.label);
-c.timeline.start.selector.style().set(s.timeline.selector);
-c.timeline.end.selector.style().set(s.timeline.selector);
+c.selectArea.label.style().set({stretch: "vertical"});
+c.selectArea.selector.style().set({stretch: "horizontal"});
 
 // Chart
+
 c.chart.placeholder.style().set(s.chart.placeholder);
 
 // Chart notes
+
 c.chartNote.title.style().set(s.text.chartNote.title);
 
-c.chartNote.section[1].style().set(s.text.chartNote.section)
-                              .set({color: "#ed5f00"});
+c.chartNote.section[1].style().set(s.text.chartNote.section);
 c.chartNote.section[2].style().set(s.text.chartNote.section);
 c.chartNote.section[3].style().set(s.text.chartNote.section);
 
-// c.chartNote.body[1].style().set({color: s.colors.brand.rosso2});
-// c.chartNote.body[2].style().set({color: "#ed5f00"});
-// c.chartNote.body[3].style().set({color: "green"});
-
 // About
+
 c.about.panel.style().set({width: "400px", shown: false});
-c.about.openButton.style().set(s.aboutButton);
-c.about.closeButton.style().set(s.aboutButton);
+c.about.openButton.style().set(s.about.button);
+c.about.closeButton.style().set(s.about.button);
 
 c.about.title.style().set({fontSize: "20px", fontWeight: "bold"});
 c.about.logo.style().set({width: "200px"});
 c.about.funding.style().set(s.text.leftAligned);
+c.about.gitHub.style().set(s.about.link);
+c.about.dataSource.style().set(s.about.link);
 
 // Legend
+
 c.legend.panel.style().set({width: "25%"});
 c.legend.bar.colors.style().set({
   stretch: "horizontal",
@@ -817,24 +582,29 @@ c.legend.bar.min.style().set(s.legend.minMax);
 c.legend.bar.max.style().set(s.legend.minMax);
 c.legend.bar.mid.style().set(s.legend.mid);
 
-// Basemap
-c.basemap.styles[t.layers.basemap[ln]] = s.silverBasemap;
-
 /*******************************************************************************
- * Behaviors *
+ * BEHAVIORS *
  ******************************************************************************/
 
-var aoi, filteredColl, maskedColl, composite;
+var aoi, maskedColl, composite;
 
-function applyFilters(target_collection) {
-  return target_collection
+function applyFilters(targetCollection) {
+  return targetCollection
     .map(renameBands(m.s2.bandIds, m.s2.bandNames))
     .filter(ee.Filter.date(m.timeline.start, m.timeline.end))
     .filter(ee.Filter.bounds(aoi))
     .filter(ee.Filter.lt(m.s2.cloudAttribute, 60))
     .map(maskClouds)
-    .map(addNDVI);
+    .map(addNDVI)
+    .map(createTimeBand);
 }
+
+function createTimeBand(image) {
+  // Scale milliseconds by a large constant to avoid very small slopes
+  // in the linear regression output.
+  return image.addBands(image.metadata("system:time_start").divide(1e12));
+}
+
 
 function maskClouds(image) {
   // Bits 10 and 11 are clouds and cirrus, respectively.
@@ -858,11 +628,16 @@ function renameBands(oldBands, newBands) {
 function addNDVI(image) {
   // bands in the image must be renamed to fit "NIR" and "RED"
   var ndviBand = image.normalizedDifference(["NIR", "RED"]).rename("NDVI");
-  return image.addBands(ndviBand)
+  return image.addBands(ndviBand);
 }
 
-function makeComposite(target_collection) {
-  return target_collection.select("NDVI").median().clip(aoi);
+function makeComposite(targetCollection) {
+  // y = k * x + b 
+  // k - NDVI trend, positive or negative ('slope' in math / 'scale' in EE);
+  // x - date; у - NDVI value for x; b - original NDVI series offset
+  var comp = targetCollection.select(["system:time_start", "NDVI"]);
+  // linearFit returns 'scale' and 'offset' bands
+  return comp.reduce(ee.Reducer.linearFit()).select("scale").clip(aoi);
 }
 
 function makePanelBreak() {
@@ -878,9 +653,9 @@ function makePanelBreak() {
 }
 
 function aoiNameHandler(selectedName) {
-  m.provinces.filtFieldVal = selectedName;
+  m.areas.filtFieldVal = selectedName;
   updateMap();
-  Map.centerObject(aoi, m.provinces.zoom);
+  Map.centerObject(aoi);
   c.chart.panel.widgets().set(0, c.chart.placeholder);
 }
 
@@ -895,45 +670,50 @@ function endDateHandler(dateRange) {
 }
 
 function updateMap() {
-  aoi = m.provinces.source.filter(ee.Filter.eq(m.provinces.filtFieldName, m.provinces.filtFieldVal));
-  filteredColl = applyFilters(m.s2.source);
-  maskedColl = filteredColl.map(maskClouds);
+  aoi = m.areas.source.filter(ee.Filter.eq(m.areas.filtFieldName, m.areas.filtFieldVal));
+  maskedColl = applyFilters(m.s2.source);
   composite = makeComposite(maskedColl);
   var compositeLayer = ui.Map.Layer(composite, m.s2.vis, t.layers.raster[ln]);
-  var borderLayer = ui.Map.Layer(aoi.style(m.provinces.vis), {}, t.layers.vector[ln]);
+  var borderLayer = ui.Map.Layer(aoi.style(m.areas.vis), {}, t.layers.vector[ln]);
   Map.layers().set(0, compositeLayer);
-  Map.layers().set(1, borderLayer);
-  // print(m.provinces.filtFieldVal, t.console.totalImages[ln], maskedColl.size());
+  //Map.layers().set(1, borderLayer);  // add administrative boundaries
 }
 
 function mapClickHandler(coords) {
-  var clickedPoint = ee.FeatureCollection(ee.Feature(ee.Geometry.Point(coords.lon, coords.lat)));
-  var clickedPointLayer = ui.Map.Layer(
-    clickedPoint,
-    {color: "green"},
-    t.layers.point[ln]
-    );
-  Map.layers().set(2, clickedPointLayer);
-
-  var chart = ui.Chart.image.series({
-    imageCollection: maskedColl.select("NDVI"),
-    region: clickedPoint,
-    reducer: ee.Reducer.mean(),
-    scale: 500,
-  })
-    .setSeriesNames([t.chart.series[ln]])
-    .setOptions(s.chart.options);
-  c.chart.panel.widgets().set(0, chart);
-}
+    var clickedPoint = ee.FeatureCollection(ee.Feature(ee.Geometry.Point(coords.lon, coords.lat)));
+    var clickedPointLayer = ui.Map.Layer(
+      clickedPoint,
+      {color: "green"},
+      t.layers.point[ln]
+      );
+    Map.layers().set(2, clickedPointLayer);
+  
+    var chart = ui.Chart.image.doySeriesByYear({
+        imageCollection: maskedColl,
+        bandName: "NDVI",
+        region: aoi,
+        regionReducer: ee.Reducer.median(),
+        scale: 10,
+        sameDayReducer: ee.Reducer.median(),
+        startDay: 1,
+        endDay: 365
+      })
+  //   var chart = ui.Chart.image.series({
+  //     imageCollection: maskedColl.select("NDVI"),
+  //     region: clickedPoint,
+  //     reducer: ee.Reducer.mean(),
+  //     scale: 500,
+  //   })
+      .setOptions(s.chart.options);
+    c.chart.panel.widgets().set(0, chart);
+  }
 
 /*******************************************************************************
- * Initialize *
+ * INITIALIZE *
  ******************************************************************************/
 
-c.timeline.start.selector.setValue(m.timeline.start);
-c.timeline.end.selector.setValue(m.timeline.end);
-c.selectProvince.selector.setValue(m.provinces.filtFieldVal);
+c.selectArea.selector.setValue(m.areas.filtFieldVal);
 
 // Render the map
-Map.setOptions(c.basemap);
+Map.setOptions("HYBRID");
 updateMap();
