@@ -8,7 +8,7 @@ Esplora la dinamica della copertura vegetale nel vicentino usando la nostra web 
 
 [<p align="center"><img src="img/webapp-button-blue.png" alt="open web app button" width="200"></p>](https://vicenzainnovationlab.users.earthengine.app/view/verde-nel-vicentino)
 
-<p align="center"><img  src="img/app-cover-full.png" alt="app screenshot" width="600"></p>
+<p align="center"><img  src="img/app-cover-full-ndvi.png" alt="app screenshot" width="600"></p>
 
 <p align="justify"><i>Il progetto è parte del Programma Operativo Regionale del Fondo Europeo di Sviluppo Regionale (POR FESR 2014 - 2020) del Veneto, nell'ambito del bando dell'azione 231 volto alla "costituzione di Innovation Lab diretti al consolidamento/sviluppo del network Centri P3@-Palestre Digitali e alla diffusione della cultura degli Open Data."</i></p>
 <p align="center"><img src="img/logo-partecipanti.png" alt="logo of participants" width="700"></p>
