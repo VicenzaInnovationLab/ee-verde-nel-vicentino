@@ -6,6 +6,8 @@
  * Description: <https://github.com/VicenzaInnovationLab/ee-verde-nel-vicentino>
  ******************************************************************************/
 
+ var appVersion = "2022.3.18";
+
 /*******************************************************************************
  * MODEL *
  ******************************************************************************/
@@ -48,8 +50,8 @@ m.areas.source = ee.FeatureCollection(
 m.areas.filtFieldName = "COMUNE";
 m.areas.filtFieldVal = "Vicenza";
 m.areas.list = m.areas.source.aggregate_array(m.areas.filtFieldName)
-                             .sort().getInfo();
-m.areas.vis = {color: "#000000", width: 2, fillColor: "ff000000"};
+  .sort().getInfo();
+m.areas.vis = { color: "#000000", width: 2, fillColor: "ff000000" };
 
 /* Time Interval **************************************************************/
 
@@ -72,7 +74,7 @@ m.bufRadius = 10;  // in a clicked point, in meters
  ******************************************************************************/
 
 // Choose app language: "it", "en" or "ru"
-var ln = "it";  
+var ln = "it";
 
 // Define a JSON object for storing multilingual strings
 var t = {};
@@ -119,7 +121,8 @@ t.chart.vAxis = {
 t.chart.hAxis = {
   it: "Numeri di giorni in un anno (1-365)",
   en: "Day-of-Year Numbers (1–365)",
-  ru: "Порядковый номер дня в году (1–365)"};
+  ru: "Порядковый номер дня в году (1–365)"
+};
 
 /* Chart Notes ****************************************************************/
 
@@ -197,10 +200,11 @@ t.legend = {};
 t.legend.title = {
   it: "Cambiamenti del verde",
   en: "Green Cover Trends",
-  ru: "Тренды растительного покрова"};
-t.legend.min = {it: "decremento", en: "decrease", ru: "понижение"};
-t.legend.mid = {it: "assenza", en: "absence", ru: "отсутствие"};
-t.legend.max = {it: "aumento", en: "increase", ru: "увеличение"};
+  ru: "Тренды растительного покрова"
+};
+t.legend.min = { it: "decremento", en: "decrease", ru: "понижение" };
+t.legend.mid = { it: "assenza", en: "absence", ru: "отсутствие" };
+t.legend.max = { it: "aumento", en: "increase", ru: "увеличение" };
 
 /* Interface Elements *********************************************************/
 
@@ -211,12 +215,19 @@ t.areaSelectorLabel = {
 };
 
 t.timeline = {};
-t.timeline.start = {it: "Inizio: ", en: "Start: ", ru: "Начало: "};
-t.timeline.end = {it: "Fine: ", en: "End: ", ru: "Конец: "};
+t.timeline.start = { it: "Inizio: ", en: "Start: ", ru: "Начало: " };
+t.timeline.end = { it: "Fine: ", en: "End: ", ru: "Конец: " };
 
 /* About **********************************************************************/
 
 t.about = {};
+
+t.about.version = {
+  it: "Versione dell'app: ",
+  en: "App Version: ",
+  ru: "Версия приложения: "
+};
+
 t.about.funding = {
   it: "Il progetto è parte del Programma Operativo Regionale del Fondo \
   Europeo di Sviluppo Regionale (POR FESR 2014-2020) del Veneto, \
@@ -236,7 +247,7 @@ t.about.funding = {
   консолидацию / развитие сети Centri P3@-Palestre Digitali и \
   распространение культуры открытых данных».",
 };
-t.about.closeButton = {it: "Chiudi", en: "Close", ru: "Закрыть"};
+t.about.closeButton = { it: "Chiudi", en: "Close", ru: "Закрыть" };
 t.about.openButton = {
   it: "Innovation Lab Vicenza",
   en: "About",
@@ -282,7 +293,7 @@ c.intro = ui.Label(t.intro[ln]);
 c.selectArea = {};
 c.selectArea.label = ui.Label(t.areaSelectorLabel[ln]);
 c.selectArea.selector = ui.Select({
-  items:  m.areas.list,
+  items: m.areas.list,
   placeholder: t.chart.placeholder[ln],
   onChange: aoiNameHandler
 });
@@ -332,7 +343,7 @@ c.legend.bar.colors = ui.Thumbnail({
 
 c.legend.bar.min = ui.Label(t.legend.min[ln]);
 c.legend.bar.mid = ui.Label(t.legend.mid[ln]),
-c.legend.bar.max = ui.Label(t.legend.max[ln]);
+  c.legend.bar.max = ui.Label(t.legend.max[ln]);
 
 c.legend.bar.labels = ui.Panel({
   widgets: [c.legend.bar.min, c.legend.bar.mid, c.legend.bar.max],
@@ -350,9 +361,10 @@ c.about = {};
 c.about.title = ui.Label(t.about.title[ln]);
 c.about.logo = ui.Thumbnail({
   image: ee.Image("users/VicenzaInnovationLab/logo-progetto"),
-  params: {min: 0, max: 255}
+  params: { min: 0, max: 255 }
 });
 c.about.funding = ui.Label(t.about.funding[ln]);
+c.about.version = ui.Label(t.about.version[ln] + appVersion);
 
 c.about.dataSource = ui.Label({
   value: t.about.data[ln],
@@ -365,14 +377,14 @@ c.about.gitHub = ui.Label({
 
 c.about.closeButton = ui.Button({
   label: t.about.closeButton[ln],
-  onClick: function() {
+  onClick: function () {
     c.about.openButton.style().set("shown", true);
     c.about.panel.style().set("shown", false);
   }
 });
 c.about.openButton = ui.Button({
   label: t.about.openButton[ln],
-  onClick: function() {
+  onClick: function () {
     c.about.openButton.style().set("shown", false);
     c.about.panel.style().set("shown", true);
   }
@@ -381,6 +393,7 @@ c.about.openButton = ui.Button({
 c.about.panel = ui.Panel([
   c.about.logo,
   c.about.funding,
+  c.about.version,
   c.about.title,
   c.about.dataSource,
   c.about.gitHub,
@@ -452,22 +465,22 @@ s.text.title = {
   fontWeight: "bold",
   color: s.colors.brand.rosso3
 };
-s.text.justified = {textAlign: "justify", stretch: "horizontal"};
-s.text.leftAligned = {textAlign: "left", stretch: "horizontal"};
+s.text.justified = { textAlign: "justify", stretch: "horizontal" };
+s.text.leftAligned = { textAlign: "left", stretch: "horizontal" };
 s.text.chartNote = {};
-s.text.chartNote.title = {fontWeight: "bold", fontSize: "16px"};
-s.text.chartNote.section = {fontWeight: "bold"};
+s.text.chartNote.title = { fontWeight: "bold", fontSize: "16px" };
+s.text.chartNote.section = { fontWeight: "bold" };
 
 // Timeline
 
 s.timeline = {};
-s.timeline.selector = {width: "72%"};
-s.timeline.label = {stretch: "both"};
+s.timeline.selector = { width: "72%" };
+s.timeline.label = { stretch: "both" };
 
 // Chart
 
 s.chart = {};
-s.chart.placeholder = {color: s.colors.brand.rosso1, fontSize: 14};
+s.chart.placeholder = { color: s.colors.brand.rosso1, fontSize: 14 };
 s.chart.title = {
   color: s.colors.brand.blu,
   fontSize: 16,
@@ -510,13 +523,13 @@ s.chart.options.hAxis = {
 //s.chart.options.curveType = "function";
 //s.chart.options.colors = [s.colors.chart.mainCurve];
 //s.chart.options.legend = {textStyle: s.chart.axis};
-s.chart.options.chartArea = {backgroundColor: s.colors.chart.areaBackground};
+s.chart.options.chartArea = { backgroundColor: s.colors.chart.areaBackground };
 
 // Legend panel
 
 s.legend = {};
-s.legend.title = {fontWeight: "bold", fontSize: "12px"};
-s.legend.minMax = {margin: "4px 8px", fontSize: "12px"};
+s.legend.title = { fontWeight: "bold", fontSize: "12px" };
+s.legend.minMax = { margin: "4px 8px", fontSize: "12px" };
 s.legend.mid = {
   margin: "4px 8px",
   textAlign: "center",
@@ -527,8 +540,8 @@ s.legend.mid = {
 // About panel
 
 s.about = {};
-s.about.button = {position: "bottom-left", "shown": true};
-s.about.link = {color: s.colors.brand.blu};
+s.about.button = { position: "bottom-left", "shown": true };
+s.about.link = { color: s.colors.brand.blu };
 
 /* Style Settings *************************************************************/
 
@@ -542,8 +555,8 @@ c.intro.style().set(s.text.justified);
 
 // Area selector
 
-c.selectArea.label.style().set({stretch: "vertical"});
-c.selectArea.selector.style().set({stretch: "horizontal"});
+c.selectArea.label.style().set({ stretch: "vertical" });
+c.selectArea.selector.style().set({ stretch: "horizontal" });
 
 // Chart
 
@@ -559,19 +572,19 @@ c.chartNote.section[3].style().set(s.text.chartNote.section);
 
 // About
 
-c.about.panel.style().set({width: "400px", shown: false});
+c.about.panel.style().set({ width: "400px", shown: false });
 c.about.openButton.style().set(s.about.button);
 c.about.closeButton.style().set(s.about.button);
 
-c.about.title.style().set({fontSize: "20px", fontWeight: "bold"});
-c.about.logo.style().set({width: "200px"});
+c.about.title.style().set({ fontSize: "20px", fontWeight: "bold" });
+c.about.logo.style().set({ width: "200px" });
 c.about.funding.style().set(s.text.leftAligned);
 c.about.gitHub.style().set(s.about.link);
 c.about.dataSource.style().set(s.about.link);
 
 // Legend
 
-c.legend.panel.style().set({width: "25%"});
+c.legend.panel.style().set({ width: "25%" });
 c.legend.bar.colors.style().set({
   stretch: "horizontal",
   margin: "0px 8px",
@@ -618,7 +631,7 @@ function maskClouds(image) {
 
 // Rename bands
 function renameBands(oldBands, newBands) {
-  var wrap = function(image) {
+  var wrap = function (image) {
     return image.select(oldBands).rename(newBands);
   };
   return wrap;
@@ -672,6 +685,7 @@ function endDateHandler(dateRange) {
 function updateMap() {
   aoi = m.areas.source.filter(ee.Filter.eq(m.areas.filtFieldName, m.areas.filtFieldVal));
   maskedColl = applyFilters(m.s2.source);
+  print(maskedColl.size());
   composite = makeComposite(maskedColl);
   var compositeLayer = ui.Map.Layer(composite, m.s2.vis, t.layers.raster[ln]);
   var borderLayer = ui.Map.Layer(aoi.style(m.areas.vis), {}, t.layers.vector[ln]);
@@ -680,33 +694,43 @@ function updateMap() {
 }
 
 function mapClickHandler(coords) {
-    var clickedPoint = ee.FeatureCollection(ee.Feature(ee.Geometry.Point(coords.lon, coords.lat)));
-    var clickedPointLayer = ui.Map.Layer(
-      clickedPoint,
-      {color: "green"},
-      t.layers.point[ln]
-      );
-    Map.layers().set(2, clickedPointLayer);
-  
-    var chart = ui.Chart.image.doySeriesByYear({
-        imageCollection: maskedColl,
-        bandName: "NDVI",
-        region: aoi,
-        regionReducer: ee.Reducer.median(),
-        scale: 10,
-        sameDayReducer: ee.Reducer.median(),
-        startDay: 1,
-        endDay: 365
-      })
-  //   var chart = ui.Chart.image.series({
-  //     imageCollection: maskedColl.select("NDVI"),
-  //     region: clickedPoint,
-  //     reducer: ee.Reducer.mean(),
-  //     scale: 500,
-  //   })
-      .setOptions(s.chart.options);
-    c.chart.panel.widgets().set(0, chart);
+  var clickedPoint = ee.FeatureCollection(ee.Feature(ee.Geometry.Point(coords.lon, coords.lat)));
+  var clickedPointLayer = ui.Map.Layer(
+    clickedPoint,
+    { color: "green" },
+    t.layers.point[ln]
+  );
+  Map.layers().set(2, clickedPointLayer);
+
+  var chart = ui.Chart.image.doySeriesByYear({
+    imageCollection: maskedColl,
+    bandName: "NDVI",
+    region: aoi,
+    regionReducer: ee.Reducer.median(),
+    scale: 10,
+    sameDayReducer: ee.Reducer.median(),
+    startDay: 1,
+    endDay: 365
+  })
+    //   var chart = ui.Chart.image.series({
+    //     imageCollection: maskedColl.select("NDVI"),
+    //     region: clickedPoint,
+    //     reducer: ee.Reducer.mean(),
+    //     scale: 500,
+    //   })
+    .setOptions(s.chart.options);
+  c.chart.panel.widgets().set(0, chart);
+}
+
+function getScreenType(screen) {
+  if (screen.is_desktop) {
+    c.controlPanel.style().set({ width: "25%" });  // true case
+  } else {
+    c.controlPanel.style().set({ width: "50%" });  // false case
   }
+}
+// "is_mobile", "is_tablet", "is_desktop", "is_portrait"
+// and "is_landscape", and numeric fields "width" and "height"
 
 /*******************************************************************************
  * INITIALIZE *
@@ -717,3 +741,6 @@ c.selectArea.selector.setValue(m.areas.filtFieldVal);
 // Render the map
 Map.setOptions("HYBRID");
 updateMap();
+
+// Responsible app interface
+ui.root.onResize(getScreenType);
