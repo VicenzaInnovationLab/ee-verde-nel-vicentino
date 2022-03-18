@@ -6,7 +6,7 @@
  * Description: <https://github.com/VicenzaInnovationLab/ee-verde-nel-vicentino>
  ******************************************************************************/
 
- var appVersion = "2022.3.18";
+var appVersion = "2022.3.18";
 
 /*******************************************************************************
  * MODEL *
@@ -74,7 +74,7 @@ m.bufRadius = 10;  // in a clicked point, in meters
  ******************************************************************************/
 
 // Choose app language: "it", "en" or "ru"
-var ln = "it";
+var ln = "ru";
 
 // Define a JSON object for storing multilingual strings
 var t = {};
@@ -685,11 +685,11 @@ function endDateHandler(dateRange) {
 function updateMap() {
   aoi = m.areas.source.filter(ee.Filter.eq(m.areas.filtFieldName, m.areas.filtFieldVal));
   maskedColl = applyFilters(m.s2.source);
-  print(maskedColl.size());
+  //print(t.console.totalImages[ln], maskedColl.size());
   composite = makeComposite(maskedColl);
   var compositeLayer = ui.Map.Layer(composite, m.s2.vis, t.layers.raster[ln]);
-  var borderLayer = ui.Map.Layer(aoi.style(m.areas.vis), {}, t.layers.vector[ln]);
   Map.layers().set(0, compositeLayer);
+  //var borderLayer = ui.Map.Layer(aoi.style(m.areas.vis), {}, t.layers.vector[ln]);
   //Map.layers().set(1, borderLayer);  // add administrative boundaries
 }
 
@@ -738,9 +738,18 @@ function getScreenType(screen) {
 
 c.selectArea.selector.setValue(m.areas.filtFieldVal);
 
-// Render the map
-Map.setOptions("HYBRID");
-updateMap();
-
 // Responsible app interface
 ui.root.onResize(getScreenType);
+
+// Render the map
+Map.setOptions("HYBRID");
+Map.setControlVisibility({
+  all: false,
+  layerList: false,
+  zoomControl: true,
+  scaleControl: true,
+  mapTypeControl: true,
+  fullscreenControl: true,
+  drawingToolsControl: false
+});
+updateMap();
