@@ -6,7 +6,7 @@
  * Description: <https://github.com/VicenzaInnovationLab/ee-verde-nel-vicentino>
  ******************************************************************************/
 
-var appVersion = "2022.3.18";
+var appVersion = "2022.3.21";
 
 /*******************************************************************************
  * MODEL *
@@ -74,7 +74,7 @@ m.bufRadius = 10;  // in a clicked point, in meters
  ******************************************************************************/
 
 // Choose app language: "it", "en" or "ru"
-var ln = "ru";
+var ln = "it";
 
 // Define a JSON object for storing multilingual strings
 var t = {};
@@ -343,7 +343,7 @@ c.legend.bar.colors = ui.Thumbnail({
 
 c.legend.bar.min = ui.Label(t.legend.min[ln]);
 c.legend.bar.mid = ui.Label(t.legend.mid[ln]),
-  c.legend.bar.max = ui.Label(t.legend.max[ln]);
+c.legend.bar.max = ui.Label(t.legend.max[ln]);
 
 c.legend.bar.labels = ui.Panel({
   widgets: [c.legend.bar.min, c.legend.bar.mid, c.legend.bar.max],
@@ -520,9 +520,6 @@ s.chart.options.hAxis = {
   titleTextStyle: s.chart.axis,
   gridlines: { color: s.colors.chart.gridline },
 };
-//s.chart.options.curveType = "function";
-//s.chart.options.colors = [s.colors.chart.mainCurve];
-//s.chart.options.legend = {textStyle: s.chart.axis};
 s.chart.options.chartArea = { backgroundColor: s.colors.chart.areaBackground };
 
 // Legend panel
@@ -584,7 +581,6 @@ c.about.dataSource.style().set(s.about.link);
 
 // Legend
 
-c.legend.panel.style().set({ width: "25%" });
 c.legend.bar.colors.style().set({
   stretch: "horizontal",
   margin: "0px 8px",
@@ -725,8 +721,10 @@ function mapClickHandler(coords) {
 function getScreenType(screen) {
   if (screen.is_desktop) {
     c.controlPanel.style().set({ width: "25%" });  // true case
+    c.legend.panel.style().set({ width: "25%" });
   } else {
     c.controlPanel.style().set({ width: "50%" });  // false case
+    c.legend.panel.style().set({ width: "75%" });
   }
 }
 // "is_mobile", "is_tablet", "is_desktop", "is_portrait"
@@ -748,8 +746,8 @@ Map.setControlVisibility({
   layerList: false,
   zoomControl: true,
   scaleControl: true,
-  mapTypeControl: true,
-  fullscreenControl: true,
+  mapTypeControl: false,
+  fullscreenControl: false,
   drawingToolsControl: false
 });
 updateMap();
